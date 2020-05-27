@@ -1,11 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:audioplayers/audio_cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ekoasia/BinResponse.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+
 import 'ChosenCity.dart';
 
 class RecordSearchScreen extends StatelessWidget {
@@ -34,8 +36,12 @@ class PlayerWidget extends StatefulWidget {
 }
 
 class _PlayerWidgetState extends State<PlayerWidget> {
+  bool _hasSpeech = false;
+  String lastError = "";
+  String lastStatus = "";
+  String _currentLocaleId = "";
+  final SpeechToText speech = SpeechToText();
   final _player = AudioCache(prefix: 'sounds/');
-
   final _searchTextController = TextEditingController();
 
   final _bins = <BinResponse>[BinResponse(name: "test1"), BinResponse(name: "test2")];
@@ -46,10 +52,6 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   void initState() {
     super.initState();
     _searchTextController.addListener(_printLatestValue);
-  }
-
-  _printLatestValue() {
-    print("Searched text: ${_searchTextController.text}");
   }
 
   @override
@@ -68,7 +70,13 @@ class _PlayerWidgetState extends State<PlayerWidget> {
           padding: EdgeInsets.all(24.0),
           icon: Image.asset('assets/images/micIcon.png'),
           iconSize: 100,
-          onPressed: () {},
+          onPressed: () {
+            if (_hasSpeech) {
+              startListening();
+            } else {
+              initSpeechState();
+            }
+          },
         ),
         SizedBox(height: 100),
         Row(
@@ -110,6 +118,55 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
       ],
     );
+  }
+
+  Future<void> initSpeechState() async {
+    bool hasSpeech = await speech.initialize(
+        onError: errorListener, onStatus: statusListener);
+    if (hasSpeech) {
+      var systemLocale = await speech.systemLocale();
+      _currentLocaleId = systemLocale.localeId;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _hasSpeech = hasSpeech;
+    });
+  }
+
+  void startListening() {
+    speech.listen(
+        onResult: resultListener,
+        listenFor: Duration(seconds: 10),
+        localeId: _currentLocaleId,
+        cancelOnError: true,
+        partialResults: true);
+    setState(() {});
+  }
+
+  void resultListener(SpeechRecognitionResult result) {
+    setState(() {
+      String lastWords = "${result.recognizedWords} - ${result.finalResult}";
+      // TODO: Send the words to firebase to get the result.
+      print(lastWords);
+    });
+  }
+
+  void statusListener(String status) {
+    setState(() {
+      lastStatus = "$status";
+    });
+  }
+
+  void errorListener(SpeechRecognitionError error) {
+    setState(() {
+      lastError = "${error.errorMsg} - ${error.permanent}";
+    });
+  }
+
+  _printLatestValue() {
+    print("Searched text: ${_searchTextController.text}");
   }
 
   Widget _buildBinsInstruction() {

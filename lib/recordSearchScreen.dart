@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audio_cache.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ekoasia/BinResponse.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'ChosenCity.dart';
 
@@ -35,6 +38,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
   final _searchTextController = TextEditingController();
 
+  final _bins = <BinResponse>[];
+
+  final databaseReference = Firestore.instance;
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +55,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -72,18 +81,67 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             Container(
                 width: 280,
                 padding: EdgeInsets.all(10.0),
-                child: TextField(controller: _searchTextController)),
+                child: TextFormField(controller: _searchTextController,
+                  decoration: InputDecoration(
+                    labelText: "Co wyrzucasz",
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  // The validator receives the text that the user has entered.
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Wprowadź co wyrzucasz!';
+                    }
+                    return null;
+                  },
+                ),
+            ),
             FlatButton(
               onPressed: () {
-                //search
+                getData();
+//                if (_formKey.currentState.validate()) { }
               },
               child: Text('Search', style: TextStyle(fontSize: 20)),
             ),
           ],
-        )
+        ),
+//        _buildBinsInstruction()
       ],
     );
   }
+
+  Widget _buildBinsInstruction() {
+    return ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemBuilder: /*1*/ (context, i) {
+          return _binRow(_bins[i]);
+        });
+  }
+
+  Widget _binRow(BinResponse bin) {
+    return ListTile(
+      title: Text(
+        bin.binName()
+      ),
+    );
+  }
+
+  void getData(){
+
+//    final dbRef = FirebaseDatabase.instance.reference().child("test");
+//
+//    dbRef.once().then((DataSnapshot snapshot) {
+//      print('Data : ${snapshot.value}');
+//    });
+    databaseReference
+        .collection("bins")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((f) => print('${f.data}}'));
+    });
+  }
+
 
   _playLocal() async {
     _player.play('audio.mp3');

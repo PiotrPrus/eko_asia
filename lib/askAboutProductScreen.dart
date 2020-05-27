@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'ChosenCity.dart';
@@ -60,6 +61,24 @@ class _ListenAndSearchState extends State<ListenAndSearchWidget> {
     });
   }
 
+  void startListening() {
+    speech.listen(
+        onResult: resultListener,
+        listenFor: Duration(seconds: 10),
+        localeId: _currentLocaleId,
+        cancelOnError: true,
+        partialResults: true);
+    setState(() {});
+  }
+
+  void resultListener(SpeechRecognitionResult result) {
+    setState(() {
+      String lastWords = "${result.recognizedWords} - ${result.finalResult}";
+      // TODO: Send the words to firebase to get the result.
+      print(lastWords);
+    });
+  }
+
   void statusListener(String status) {
     setState(() {
       lastStatus = "$status";
@@ -95,7 +114,7 @@ class _ListenAndSearchState extends State<ListenAndSearchWidget> {
           iconSize: 100,
           onPressed: () {
             if (_hasSpeech) {
-              print("microphone tapped");
+              startListening();
             } else {
               initSpeechState();
             }

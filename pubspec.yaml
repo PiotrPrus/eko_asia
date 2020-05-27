@@ -43,3 +43,4 @@ flutter:
 
   assets:
     - assets/sounds/audio.mp3
+    - assets/images/

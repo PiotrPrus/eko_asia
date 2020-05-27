@@ -118,7 +118,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                 var itemName = _searchTextController.text;
                 _searchTextController.text = "";
                 var response = await networkService
-                    .fetchBinResponse(itemName.toLowerCase());
+                    .fetchBinResponse(widget.city.cityCode, itemName.toLowerCase());
                 print(response.bins.map((e) => e.namePl));
                 setState(() {
                   _bins.clear();
@@ -166,7 +166,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       print(lastWords.toLowerCase());
       _searchTextController.text = lastWords.toLowerCase();
 
-      var response = await networkService.fetchBinResponse(lastWords);
+      var response = await networkService.fetchBinResponse(widget.city.cityCode, lastWords);
       print(response.bins.map((e) => "${e.namePl} ${e.products}"));
       setState(() {
         _bins.clear();

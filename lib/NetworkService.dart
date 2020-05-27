@@ -8,9 +8,9 @@ class NetworkService {
   final String endpoint = "us-central1-ekoasia-6514e.cloudfunctions.net";
   final String wastePath  = "/throwWaste";
 
-  Future<DedicatedBin> fetchBinResponse(String itemName) async {
+  Future<DedicatedBin> fetchBinResponse(String location, String itemName) async {
     var queryParameters = {
-      'location': 'gd',
+      'location': location,
       'name': itemName.toLowerCase(),
     };
 

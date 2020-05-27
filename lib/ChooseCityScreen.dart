@@ -24,7 +24,7 @@ class ChooseCityScreen extends StatelessWidget {
             icon: Image.asset('assets/images/gdansk_button.png'),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => RecordSearchScreen(city: ChosenCity('gdansk'),)));
+                  builder: (context) => RecordSearchScreen(city: ChosenCity('gdansk', 'gd'),)));
               print("gdansk pressed");
             },
           ),
@@ -33,7 +33,7 @@ class ChooseCityScreen extends StatelessWidget {
             icon: Image.asset('assets/images/krakow_button.png'),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => RecordSearchScreen(city: ChosenCity('krakow'),)));
+                  builder: (context) => RecordSearchScreen(city: ChosenCity('krakow', 'kr'),)));
               print("krakow pressed");
             },
           )

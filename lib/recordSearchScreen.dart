@@ -3,12 +3,7 @@ import 'dart:io';
 
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
-
-class ChosenCity {
-  final String cityName;
-
-  ChosenCity(this.cityName);
-}
+import 'ChosenCity.dart';
 
 class RecordSearchScreen extends StatelessWidget {
   static const routeName = '/recordSearch';

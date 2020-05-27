@@ -2,6 +2,8 @@ import 'package:ekoasia/askAboutProductScreen.dart';
 import 'package:ekoasia/recordSearchScreen.dart';
 import 'package:flutter/material.dart';
 
+import 'ChosenCity.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -51,7 +53,8 @@ class _LocationAppPageState extends State<LocationAppPage> {
                 ),
                 RaisedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, AskAboutProduct.routeName);
+                    Navigator.pushNamed(context, AskAboutProduct.routeName,
+                          arguments: ChosenCity("krakow"));
                   },
                   child: Text('Krakow', style: TextStyle(fontSize: 20)),
                 )

@@ -1,4 +1,3 @@
-import 'package:ekoasia/askAboutProductScreen.dart';
 import 'package:ekoasia/recordSearchScreen.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +17,6 @@ class MyApp extends StatelessWidget {
         home: LocationAppPage(title: 'Select your location'),
         routes: {
           RecordSearchScreen.routeName: (context) => RecordSearchScreen(),
-          AskAboutProduct.routeName: (context) => AskAboutProduct(),
         });
   }
 }
@@ -53,8 +51,8 @@ class _LocationAppPageState extends State<LocationAppPage> {
                 ),
                 RaisedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, AskAboutProduct.routeName,
-                          arguments: ChosenCity("krakow"));
+                    Navigator.pushNamed(context, RecordSearchScreen.routeName,
+                        arguments: ChosenCity("krakow"));
                   },
                   child: Text('Krakow', style: TextStyle(fontSize: 20)),
                 )

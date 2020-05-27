@@ -19,7 +19,6 @@ class RecordSearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Record and Search"),
@@ -63,31 +62,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text('You have selected ${widget.city.cityName}'),
-        RaisedButton(
-          onPressed: () {
-            _playLocal();
-          },
-          child: Text('Play test sound', style: TextStyle(fontSize: 20)),
-        ),
-        IconButton(
-          padding: EdgeInsets.all(24.0),
-          icon: Image.asset('assets/images/micIcon.png'),
-          iconSize: 100,
-          onPressed: () {
-            if (_hasSpeech) {
-              _searchTextController.text = "";
-              if (speech.isListening) {
-                speech.stop();
-              } else {
-                startListening();
-              }
-            } else {
-              initSpeechState();
-            }
-          },
-        ),
-        SizedBox(height: 100),
+        SizedBox(height: 20),
         Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -116,17 +91,28 @@ class _PlayerWidgetState extends State<PlayerWidget> {
               onPressed: () async {
                 var itemName = _searchTextController.text;
                 _searchTextController.text = "";
-                var response = await networkService
-                    .fetchBinResponse(widget.city.cityCode, itemName.toLowerCase());
-                response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
-                setState(() {
-                  _bins.clear();
-                  _bins.addAll(response.bins);
-                });
+                getDedicatedBins(itemName);
               },
-              child: Text('Search', style: TextStyle(fontSize: 20)),
+              child: Text('Szukaj', style: TextStyle(fontSize: 20)),
             ),
           ],
+        ),
+        IconButton(
+          padding: EdgeInsets.all(24.0),
+          icon: Image.asset('assets/images/micIcon.png'),
+          iconSize: 100,
+          onPressed: () {
+            if (_hasSpeech) {
+              _searchTextController.text = "";
+              if (speech.isListening) {
+                speech.stop();
+              } else {
+                startListening();
+              }
+            } else {
+              initSpeechState();
+            }
+          },
         ),
         Expanded(child: _buildBinsInstruction())
       ],
@@ -164,13 +150,19 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       // TODO: Send the words to firebase to get the result.
       print(lastWords.toLowerCase());
       _searchTextController.text = lastWords.toLowerCase();
+      getDedicatedBins(lastWords);
+    });
+  }
 
-      var response = await networkService.fetchBinResponse(widget.city.cityCode, lastWords);
-      response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
-      setState(() {
-        _bins.clear();
-        _bins.addAll(response.bins);
-      });
+  Future<void> getDedicatedBins(String itemName) async {
+    var response =
+        await networkService.fetchBinResponse(widget.city.cityCode, itemName);
+    response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
+
+    setState(() {
+      _bins.clear();
+      _bins.addAll(
+          response.bins.where((element) => element.products != null).toList());
     });
   }
 
@@ -191,17 +183,51 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         padding: const EdgeInsets.all(16.0),
         itemCount: _bins.length,
         itemBuilder: /*1*/ (context, i) {
-          if (_bins[i].products == null) {
-            return Container();
-          }
           return _binRow(_bins[i]);
         });
   }
 
   Widget _binRow(Bin bin) {
-    return ListTile(
-      title: Text(bin.namePl),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        Column(
+          children: bin.products.map((e) => new Text(e, style: TextStyle(fontSize: 20))).toList(),
+        ),
+        Image(
+            image: AssetImage(_imagePath(bin)),
+            height: 200,
+            width: 200,
+            fit: BoxFit.fitWidth),
+      ],
     );
+  }
+
+  String _imagePath(Bin bin) {
+    switch (bin.name) {
+      case "Other":
+        // TODO: grafika
+        return "assets/images/odpady-niebezpieczne.png";
+      case "Paper":
+        return "assets/images/kontener-na-papier.png";
+      case "Glass":
+        return "assets/images/kontener-na-szklo.png";
+      case "Plastic & metal":
+        return "assets/images/kontener-na-plastik.png";
+      case "Organic":
+        return "assets/images/kontener-bio.png";
+      case "Oversized":
+        // TODO: grafika
+        return "assets/images/odpady-niebezpieczne.png";
+      case "Drugs":
+        // TODO: grafika
+        return "assets/images/odpady-niebezpieczne.png";
+      default:
+        {
+          return "assets/images/odpady-niebezpieczne.png";
+        }
+    }
   }
 
   _playLocal() async {

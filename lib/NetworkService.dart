@@ -8,10 +8,10 @@ class NetworkService {
   final String endpoint = "us-central1-ekoasia-6514e.cloudfunctions.net";
   final String wastePath  = "/throwWaste";
 
-  Future<DedicatedBin> fetchBinResponse() async {
+  Future<DedicatedBin> fetchBinResponse(String itemName) async {
     var queryParameters = {
       'location': 'gd',
-      'name': 'maska',
+      'name': itemName.toLowerCase(),
     };
 
     print(endpoint);
@@ -26,7 +26,16 @@ class NetworkService {
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      return DedicatedBin.fromJson(json.decode(response.body));
+
+      JsonCodec codec = new JsonCodec();
+
+      try{
+        var decoded = codec.decode(response.body);
+        return DedicatedBin.fromJson(decoded);
+      } catch(e) {
+        print("Error: $e");
+        throw Exception('Failed to load album');
+      }
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.

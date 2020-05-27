@@ -38,14 +38,13 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
   final _searchTextController = TextEditingController();
 
-  final _bins = <BinResponse>[];
+  final _bins = <BinResponse>[BinResponse(name: "test1"), BinResponse(name: "test2")];
 
   final databaseReference = Firestore.instance;
 
   @override
   void initState() {
     super.initState();
-
     _searchTextController.addListener(_printLatestValue);
   }
 
@@ -55,8 +54,6 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -79,23 +76,24 @@ class _PlayerWidgetState extends State<PlayerWidget> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Container(
-                width: 280,
-                padding: EdgeInsets.all(10.0),
-                child: TextFormField(controller: _searchTextController,
-                  decoration: InputDecoration(
-                    labelText: "Co wyrzucasz",
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
+              width: 280,
+              padding: EdgeInsets.all(10.0),
+              child: TextFormField(
+                controller: _searchTextController,
+                decoration: InputDecoration(
+                  labelText: "Co wyrzucasz",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
-                  // The validator receives the text that the user has entered.
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Wprowadź co wyrzucasz!';
-                    }
-                    return null;
-                  },
                 ),
+                // The validator receives the text that the user has entered.
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Wprowadź co wyrzucasz!';
+                  }
+                  return null;
+                },
+              ),
             ),
             FlatButton(
               onPressed: () {
@@ -106,7 +104,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             ),
           ],
         ),
-//        _buildBinsInstruction()
+        Expanded(
+            child:  _buildBinsInstruction()
+        )
+
       ],
     );
   }
@@ -114,34 +115,30 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   Widget _buildBinsInstruction() {
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
+        itemCount: _bins.length,
         itemBuilder: /*1*/ (context, i) {
+          print(i);
           return _binRow(_bins[i]);
         });
   }
 
   Widget _binRow(BinResponse bin) {
     return ListTile(
-      title: Text(
-        bin.binName()
-      ),
+      title: Text(bin.binName()),
     );
   }
 
-  void getData(){
-
-//    final dbRef = FirebaseDatabase.instance.reference().child("test");
-//
-//    dbRef.once().then((DataSnapshot snapshot) {
-//      print('Data : ${snapshot.value}');
-//    });
+  void getData() {
     databaseReference
         .collection("bins")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
-      snapshot.documents.forEach((f) => print('${f.data}}'));
+//      snapshot.documents.forEach((f) => print('${f.data}}'));
+        var bins = snapshot.documents.map((snapshot) => BinResponse.fromSnapshot(snapshot));
+        print(bins.map((e) => e.name));
+
     });
   }
-
 
   _playLocal() async {
     _player.play('audio.mp3');

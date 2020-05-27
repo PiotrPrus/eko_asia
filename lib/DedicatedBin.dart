@@ -19,17 +19,6 @@ class DedicatedBin {
       });
     }
   }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.questions != null) {
-      data['questions'] = this.questions.map((v) => v.toJson()).toList();
-    }
-    if (this.bins != null) {
-      data['bins'] = this.bins.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
 }
 
 class Question {
@@ -49,16 +38,6 @@ class Question {
     }
     id = json['id'];
   }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    if (this.answers != null) {
-      data['answers'] = this.answers.map((v) => v.toJson()).toList();
-    }
-    data['id'] = this.id;
-    return data;
-  }
 }
 
 class Answers {
@@ -70,13 +49,6 @@ class Answers {
   Answers.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     title = json['title'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    return data;
   }
 }
 
@@ -93,13 +65,5 @@ class Bin {
     if (json['products'] != null) {
       products = json['products'].cast<String>();
     }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['name_pl'] = this.namePl;
-    data['products'] = this.products;
-    return data;
   }
 }

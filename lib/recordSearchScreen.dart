@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 class ChosenCity {
@@ -20,13 +25,34 @@ class RecordSearchScreen extends StatelessWidget {
         title: Text("Record and Search"),
       ),
       body: Center(
-        child: RaisedButton(
-          onPressed: () {
-            // Navigate back to first screen when tapped.
-          },
-          child: Text('You have selected ${args.cityName}'),
-        ),
+        child: PlayerWidget(city: args)
       ),
     );
   }
 }
+
+class PlayerWidget extends StatefulWidget {
+  PlayerWidget({Key key, this.city}) : super(key: key);
+
+  final ChosenCity city;
+
+  @override
+  _PlayerWidgetState createState() => _PlayerWidgetState();
+}
+
+class _PlayerWidgetState extends State<PlayerWidget> {
+  AudioCache audioCache = AudioCache();
+  AudioPlayer advancedPlayer = AudioPlayer();
+  String localFilePath;
+
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton(
+      onPressed: () {
+        // Navigate back to first screen when tapped.
+      },
+      child: Text('You have selected ${widget.city.cityName}'),
+    );
+  }
+
+  }

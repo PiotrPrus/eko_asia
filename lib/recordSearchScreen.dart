@@ -62,7 +62,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        SizedBox(height: 100),
+        SizedBox(height: 20),
         Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -93,11 +93,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                 _searchTextController.text = "";
                 getDedicatedBins(itemName);
               },
-              child: Text('Search', style: TextStyle(fontSize: 20)),
+              child: Text('Szukaj', style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
-        SizedBox(height: 100),
         IconButton(
           padding: EdgeInsets.all(24.0),
           icon: Image.asset('assets/images/micIcon.png'),

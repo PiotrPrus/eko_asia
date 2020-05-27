@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audio_cache.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 class ChosenCity {
@@ -40,18 +39,31 @@ class PlayerWidget extends StatefulWidget {
 }
 
 class _PlayerWidgetState extends State<PlayerWidget> {
-  AudioCache audioCache = AudioCache();
-  AudioPlayer advancedPlayer = AudioPlayer();
-  String localFilePath;
+  final player = AudioCache(prefix: 'sounds/');
+
+  _playLocal() async {
+    player.play('audio.mp3');
+  }
 
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
-      onPressed: () {
-        // Navigate back to first screen when tapped.
-      },
-      child: Text('You have selected ${widget.city.cityName}'),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text('You have selected ${widget.city.cityName}'),
+        RaisedButton(
+          onPressed: () {
+            _playLocal();
+          },
+          child: Text('Play test sound', style: TextStyle(fontSize: 20)),
+        ),
+        IconButton(
+          padding: EdgeInsets.all(24.0),
+          icon: Image.asset('assets/images/micIcon.png'),
+          iconSize: 100,
+          onPressed: () {},
+        )
+      ],
     );
   }
-
-  }
+}

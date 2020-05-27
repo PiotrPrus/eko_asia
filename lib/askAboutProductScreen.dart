@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 import 'ChosenCity.dart';
-import 'recordSearchScreen.dart';
 
 class AskAboutProduct extends StatelessWidget {
   static const routeName = '/askAsia';
@@ -22,13 +23,73 @@ class AskAboutProduct extends StatelessWidget {
         title: Text("Record and Search"),
       ),
       body: Center(
-          child: PlayerWidget(city: args)
+          child: ListenAndSearchWidget(city: args)
       ),
     );
   }
 }
 
-class _PlayerWidgetState extends State<PlayerWidget> {
+class ListenAndSearchWidget extends StatefulWidget {
+  ListenAndSearchWidget({Key key, this.city}) : super(key: key);
+
+  final ChosenCity city;
+
+  @override
+  _ListenAndSearchState createState() => _ListenAndSearchState();
+  }
+
+
+class _ListenAndSearchState extends State<ListenAndSearchWidget> {
+  bool _hasSpeech = false;
+  String lastError = "";
+  String lastStatus = "";
+  String _currentLocaleId = "";
+  final SpeechToText speech = SpeechToText();
+
+  Future<void> initSpeechState() async {
+    bool hasSpeech = await speech.initialize(
+        onError: errorListener, onStatus: statusListener);
+    if (hasSpeech) {
+      var systemLocale = await speech.systemLocale();
+      _currentLocaleId = systemLocale.localeId;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _hasSpeech = hasSpeech;
+    });
+  }
+
+  void startListening() {
+    speech.listen(
+        onResult: resultListener,
+        listenFor: Duration(seconds: 10),
+        localeId: _currentLocaleId,
+        cancelOnError: true,
+        partialResults: true);
+    setState(() {});
+  }
+
+  void resultListener(SpeechRecognitionResult result) {
+    setState(() {
+      String lastWords = "${result.recognizedWords} - ${result.finalResult}";
+      // TODO: Send the words to firebase to get the result.
+      print(lastWords);
+    });
+  }
+
+  void statusListener(String status) {
+    setState(() {
+      lastStatus = "$status";
+    });
+  }
+
+  void errorListener(SpeechRecognitionError error) {
+    setState(() {
+      lastError = "${error.errorMsg} - ${error.permanent}";
+    });
+  }
   final player = AudioCache(prefix: 'sounds/');
 
   _playLocal() async {
@@ -51,7 +112,13 @@ class _PlayerWidgetState extends State<PlayerWidget> {
           padding: EdgeInsets.all(24.0),
           icon: Image.asset('assets/images/micIcon.png'),
           iconSize: 100,
-          onPressed: () {},
+          onPressed: () {
+            if (_hasSpeech) {
+              startListening();
+            } else {
+              initSpeechState();
+            }
+          },
         )
       ],
     );

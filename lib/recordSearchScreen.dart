@@ -14,7 +14,6 @@ class ChosenCity {
 class RecordSearchScreen extends StatelessWidget {
   static const routeName = '/recordSearch';
 
-
   @override
   Widget build(BuildContext context) {
 

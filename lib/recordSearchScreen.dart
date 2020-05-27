@@ -198,9 +198,9 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
   FlatButton answerButton(Answers answer, String questionId, String itemName) {
     return FlatButton(child: Text(answer.title), onPressed: () async {
+      Navigator.of(context).pop();
       var response = await networkService.sendAnswer(questionId, answer.id, itemName);
       updateListWithBins(response);
-      Navigator.of(context).pop();
     });
   }
 

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "661795958476",
+    "firebase_url": "https://ekoasia-6514e.firebaseio.com",
+    "project_id": "ekoasia-6514e",
+    "storage_bucket": "ekoasia-6514e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661795958476:android:d2d7109529cd0899c79c69",
+        "android_client_info": {
+          "package_name": "com.example.ekoasia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "661795958476-guv7djjutelqbcivqa3eps108ogsjg6k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN5CU-ytEh6xuzW6kosNFRDUEYUXE5ZVg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661795958476-guv7djjutelqbcivqa3eps108ogsjg6k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "661795958476-5utmn8dp1ivaqo1hqrqtabh9fllv5uiv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ekoasia"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

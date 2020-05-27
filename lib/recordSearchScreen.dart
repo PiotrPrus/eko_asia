@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:ekoasia/Styles.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:audioplayers/audio_cache.dart';
@@ -15,14 +16,12 @@ import 'NetworkService.dart';
 
 class RecordSearchScreen extends StatelessWidget {
   final ChosenCity city;
+
   RecordSearchScreen({Key key, @required this.city}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Record and Search"),
-      ),
       body: Center(child: PlayerWidget(city: city)),
     );
   }
@@ -45,6 +44,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   final SpeechToText speech = SpeechToText();
   final _player = AudioCache(prefix: 'sounds/');
   final _searchTextController = TextEditingController();
+  AssetImage _micImage;
 
   final _bins = <Bin>[];
 
@@ -55,67 +55,81 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   @override
   void initState() {
     super.initState();
+    _micImage = AssetImage('assets/images/mic_inactive.png');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        SizedBox(height: 20),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: 280,
-              padding: EdgeInsets.all(10.0),
-              child: TextFormField(
-                controller: _searchTextController,
-                decoration: InputDecoration(
-                  labelText: "Co wyrzucasz",
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Wprowadź co wyrzucasz!';
-                  }
-                  return null;
-                },
-              ),
+    return Container(
+      color: backgroundGrey,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(top: 100, bottom: 20),
+            child: Text(
+              'Co chcesz wyrzucić?',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            FlatButton(
-              onPressed: () async {
-                var itemName = _searchTextController.text;
+          ),
+          IconButton(
+            padding: EdgeInsets.all(24.0),
+            icon: Image(image: _micImage),
+            iconSize: 120,
+            onPressed: () {
+              updateMicImage();
+              if (_hasSpeech) {
                 _searchTextController.text = "";
-                getDedicatedBins(itemName);
-              },
-              child: Text('Szukaj', style: TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-        IconButton(
-          padding: EdgeInsets.all(24.0),
-          icon: Image.asset('assets/images/micIcon.png'),
-          iconSize: 100,
-          onPressed: () {
-            if (_hasSpeech) {
-              _searchTextController.text = "";
-              if (speech.isListening) {
-                speech.stop();
+                if (speech.isListening) {
+                  speech.stop();
+                } else {
+                  startListening();
+                }
               } else {
-                startListening();
+                initSpeechState();
               }
-            } else {
-              initSpeechState();
-            }
-          },
-        ),
-        Expanded(child: _buildBinsInstruction())
-      ],
+            },
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 280,
+                padding: EdgeInsets.all(10.0),
+                child: TextFormField(
+                  controller: _searchTextController,
+                  decoration: InputDecoration(
+                    labelText: "Co wyrzucasz",
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  // The validator receives the text that the user has entered.
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Wprowadź co wyrzucasz!';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton(
+                  icon: Icon(Icons.search, size: 40),
+                  onPressed: () async {
+                    var itemName = _searchTextController.text;
+                    _searchTextController.text = "";
+                    getDedicatedBins(itemName);
+                  },
+                ),
+              ),
+            ],
+          ),
+          Expanded(child: _buildBinsInstruction())
+        ],
+      ),
     );
   }
 
@@ -134,6 +148,23 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     });
   }
 
+  void updateMicImage() {
+    setState(() {
+      if (_hasSpeech) {
+        if(speech.isListening) {
+          print("AAA, isListening");
+          _micImage = AssetImage('assets/images/mic_listening.png');
+        } else {
+          print("AAA, isReady");
+          _micImage = AssetImage('assets/images/mic_active.png');
+        }
+      } else {
+        print("AAA, isInactive");
+        _micImage = AssetImage('assets/images/mic_inactive.png');
+      }
+    });
+  }
+
   void startListening() {
     speech.listen(
         onResult: resultListener,
@@ -147,7 +178,6 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   void resultListener(SpeechRecognitionResult result) {
     setState(() async {
       String lastWords = "${result.recognizedWords}";
-      // TODO: Send the words to firebase to get the result.
       print(lastWords.toLowerCase());
       _searchTextController.text = lastWords.toLowerCase();
       getDedicatedBins(lastWords);
@@ -159,7 +189,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         await networkService.fetchBinResponse(widget.city.cityCode, itemName);
     response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
 
-    var responseList = response.bins.where((element) => element.products != null).toList();
+    var responseList =
+        response.bins.where((element) => element.products != null).toList();
 
     //TODO: Fix for multiple answers
     if (responseList.length == 1) {
@@ -199,7 +230,9 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         Column(
-          children: bin.products.map((e) => new Text(e, style: TextStyle(fontSize: 20))).toList(),
+          children: bin.products
+              .map((e) => new Text(e, style: TextStyle(fontSize: 20)))
+              .toList(),
         ),
         Image(
             image: AssetImage(_imagePath(bin)),

@@ -10,16 +10,13 @@ class RecordSearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final ChosenCity args = ModalRoute.of(context).settings.arguments;
 
     return Scaffold(
       appBar: AppBar(
         title: Text("Record and Search"),
       ),
-      body: Center(
-        child: PlayerWidget(city: args)
-      ),
+      body: Center(child: PlayerWidget(city: args)),
     );
   }
 }
@@ -34,10 +31,19 @@ class PlayerWidget extends StatefulWidget {
 }
 
 class _PlayerWidgetState extends State<PlayerWidget> {
-  final player = AudioCache(prefix: 'sounds/');
+  final _player = AudioCache(prefix: 'sounds/');
 
-  _playLocal() async {
-    player.play('audio.mp3');
+  final _searchTextController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _searchTextController.addListener(_printLatestValue);
+  }
+
+  _printLatestValue() {
+    print("Searched text: ${_searchTextController.text}");
   }
 
   @override
@@ -57,8 +63,29 @@ class _PlayerWidgetState extends State<PlayerWidget> {
           icon: Image.asset('assets/images/micIcon.png'),
           iconSize: 100,
           onPressed: () {},
+        ),
+        SizedBox(height: 100),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+                width: 280,
+                padding: EdgeInsets.all(10.0),
+                child: TextField(controller: _searchTextController)),
+            FlatButton(
+              onPressed: () {
+                //search
+              },
+              child: Text('Search', style: TextStyle(fontSize: 20)),
+            ),
+          ],
         )
       ],
     );
+  }
+
+  _playLocal() async {
+    _player.play('audio.mp3');
   }
 }

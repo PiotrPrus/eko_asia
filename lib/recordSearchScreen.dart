@@ -9,6 +9,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'ChosenCity.dart';
+import 'Product.dart';
 
 class RecordSearchScreen extends StatelessWidget {
   static const routeName = '/recordSearch';
@@ -44,7 +45,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   final _player = AudioCache(prefix: 'sounds/');
   final _searchTextController = TextEditingController();
 
-  final _bins = <BinResponse>[BinResponse(name: "test1"), BinResponse(name: "test2")];
+  final _bins = <Product>[];
 
   final databaseReference = Firestore.instance;
 
@@ -72,8 +73,16 @@ class _PlayerWidgetState extends State<PlayerWidget> {
           iconSize: 100,
           onPressed: () {
             if (_hasSpeech) {
-              startListening();
+              print("START!");
+              _searchTextController.text = "";
+              if(speech.isListening) {
+                speech.stop();
+              } else {
+                startListening();
+              }
             } else {
+              print("INIT!");
+
               initSpeechState();
             }
           },
@@ -105,8 +114,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             ),
             FlatButton(
               onPressed: () {
-                getData();
-//                if (_formKey.currentState.validate()) { }
+                print("STOP!");
+                speech.stop();
               },
               child: Text('Search', style: TextStyle(fontSize: 20)),
             ),
@@ -139,17 +148,19 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     speech.listen(
         onResult: resultListener,
         listenFor: Duration(seconds: 10),
-        localeId: _currentLocaleId,
+        localeId: "pl",
         cancelOnError: true,
-        partialResults: true);
+        partialResults: false);
     setState(() {});
   }
 
   void resultListener(SpeechRecognitionResult result) {
     setState(() {
-      String lastWords = "${result.recognizedWords} - ${result.finalResult}";
+      String lastWords = "${result.recognizedWords}";
       // TODO: Send the words to firebase to get the result.
-      print(lastWords);
+      print(lastWords.toLowerCase());
+      getData(lastWords.toLowerCase());
+      _searchTextController.text = lastWords.toLowerCase();
     });
   }
 
@@ -174,26 +185,30 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         padding: const EdgeInsets.all(16.0),
         itemCount: _bins.length,
         itemBuilder: /*1*/ (context, i) {
-          print(i);
           return _binRow(_bins[i]);
         });
   }
 
-  Widget _binRow(BinResponse bin) {
+  Widget _binRow(Product bin) {
     return ListTile(
-      title: Text(bin.binName()),
+      title: Text(bin.binType),
     );
   }
 
-  void getData() {
+  void getData(String searchTerm) {
     databaseReference
-        .collection("bins")
+        .collection("testProducts")
+        .where('keywords', arrayContains: searchTerm)
         .getDocuments()
         .then((QuerySnapshot snapshot) {
-//      snapshot.documents.forEach((f) => print('${f.data}}'));
-        var bins = snapshot.documents.map((snapshot) => BinResponse.fromSnapshot(snapshot));
+//        snapshot.documents.forEach((f) => print('${f.data}}'));
+        var bins = snapshot.documents.map((snapshot) => Product.fromSnapshot(snapshot));
         print(bins.map((e) => e.name));
 
+        setState(() {
+          _bins.clear();
+          _bins.addAll(bins);
+        });
     });
   }
 

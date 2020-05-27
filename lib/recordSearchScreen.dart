@@ -4,15 +4,14 @@ import 'package:http/http.dart' as http;
 
 import 'package:audioplayers/audio_cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ekoasia/BinResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'ChosenCity.dart';
+import 'DedicatedBin.dart';
 import 'NetworkService.dart';
-import 'Product.dart';
 
 class RecordSearchScreen extends StatelessWidget {
   final ChosenCity city;
@@ -48,7 +47,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   final _player = AudioCache(prefix: 'sounds/');
   final _searchTextController = TextEditingController();
 
-  final _bins = <Product>[];
+  final _bins = <Bin>[];
 
   final networkService = NetworkService();
 
@@ -78,16 +77,13 @@ class _PlayerWidgetState extends State<PlayerWidget> {
           iconSize: 100,
           onPressed: () {
             if (_hasSpeech) {
-              print("START!");
               _searchTextController.text = "";
-              if(speech.isListening) {
+              if (speech.isListening) {
                 speech.stop();
               } else {
                 startListening();
               }
             } else {
-              print("INIT!");
-
               initSpeechState();
             }
           },
@@ -118,19 +114,22 @@ class _PlayerWidgetState extends State<PlayerWidget> {
               ),
             ),
             FlatButton(
-              onPressed: () {
-                print("STOP!");
-                print(networkService.fetchBinResponse());
-//                speech.stop();
+              onPressed: () async {
+                var itemName = _searchTextController.text;
+                _searchTextController.text = "";
+                var response = await networkService
+                    .fetchBinResponse(itemName.toLowerCase());
+                print(response.bins.map((e) => e.namePl));
+                setState(() {
+                  _bins.clear();
+                  _bins.addAll(response.bins);
+                });
               },
               child: Text('Search', style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
-        Expanded(
-            child:  _buildBinsInstruction()
-        )
-
+        Expanded(child: _buildBinsInstruction())
       ],
     );
   }
@@ -161,12 +160,18 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   }
 
   void resultListener(SpeechRecognitionResult result) {
-    setState(() {
+    setState(() async {
       String lastWords = "${result.recognizedWords}";
       // TODO: Send the words to firebase to get the result.
       print(lastWords.toLowerCase());
-      getData(lastWords.toLowerCase());
       _searchTextController.text = lastWords.toLowerCase();
+
+      var response = await networkService.fetchBinResponse(lastWords);
+      print(response.bins.map((e) => e.namePl));
+      setState(() {
+        _bins.clear();
+        _bins.addAll(response.bins);
+      });
     });
   }
 
@@ -195,27 +200,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         });
   }
 
-  Widget _binRow(Product bin) {
+  Widget _binRow(Bin bin) {
     return ListTile(
-      title: Text(bin.binType),
+      title: Text(bin.namePl),
     );
-  }
-
-  void getData(String searchTerm) {
-    databaseReference
-        .collection("testProducts")
-        .where('keywords', arrayContains: searchTerm)
-        .getDocuments()
-        .then((QuerySnapshot snapshot) {
-//        snapshot.documents.forEach((f) => print('${f.data}}'));
-        var bins = snapshot.documents.map((snapshot) => Product.fromSnapshot(snapshot));
-        print(bins.map((e) => e.name));
-
-        setState(() {
-          _bins.clear();
-          _bins.addAll(bins);
-        });
-    });
   }
 
   _playLocal() async {

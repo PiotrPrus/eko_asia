@@ -1,10 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'Product.dart';
+
 class BinResponse {
-  final int binType;
-  final Set<String> products;
+  String documentID;
+  String name;
+
+  List<Product> products = new List<Product>();
 
   String binName() {
     return "Happy Bin";
   }
 
-  BinResponse(this.binType, this.products);
+  BinResponse({this.name, this.products});
+
+  BinResponse.fromSnapshot(DocumentSnapshot snapshot)
+      : documentID = snapshot.documentID,
+        name = snapshot['name'];
 }
+
+

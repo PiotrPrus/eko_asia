@@ -43,13 +43,14 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   final SpeechToText speech = SpeechToText();
   final _player = AudioCache(prefix: 'sounds/');
   final _searchTextController = TextEditingController();
-  final _bins = <BinResponse>[];
+
+  final _bins = <BinResponse>[BinResponse(name: "test1"), BinResponse(name: "test2")];
+
   final databaseReference = Firestore.instance;
 
   @override
   void initState() {
     super.initState();
-
     _searchTextController.addListener(_printLatestValue);
   }
 
@@ -111,7 +112,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             ),
           ],
         ),
-//        _buildBinsInstruction()
+        Expanded(
+            child:  _buildBinsInstruction()
+        )
+
       ],
     );
   }
@@ -168,7 +172,9 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   Widget _buildBinsInstruction() {
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
+        itemCount: _bins.length,
         itemBuilder: /*1*/ (context, i) {
+          print(i);
           return _binRow(_bins[i]);
         });
   }
@@ -180,16 +186,14 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   }
 
   void getData() {
-//    final dbRef = FirebaseDatabase.instance.reference().child("test");
-//
-//    dbRef.once().then((DataSnapshot snapshot) {
-//      print('Data : ${snapshot.value}');
-//    });
     databaseReference
         .collection("bins")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
-      snapshot.documents.forEach((f) => print('${f.data}}'));
+//      snapshot.documents.forEach((f) => print('${f.data}}'));
+        var bins = snapshot.documents.map((snapshot) => BinResponse.fromSnapshot(snapshot));
+        print(bins.map((e) => e.name));
+
     });
   }
 

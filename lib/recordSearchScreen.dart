@@ -159,10 +159,16 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         await networkService.fetchBinResponse(widget.city.cityCode, itemName);
     response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
 
+    var responseList = response.bins.where((element) => element.products != null).toList();
+
+    //TODO: Fix for multiple answers
+    if (responseList.length == 1) {
+      _playSoundResponse(responseList.first);
+    }
+
     setState(() {
       _bins.clear();
-      _bins.addAll(
-          response.bins.where((element) => element.products != null).toList());
+      _bins.addAll(responseList);
     });
   }
 
@@ -230,7 +236,26 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     }
   }
 
-  _playLocal() async {
-    _player.play('audio.mp3');
+  _playSoundResponse(Bin bin) async {
+    switch (bin.name) {
+      case "Other":
+        _player.play('ZMIESZANE.mp3');
+        break;
+      case "Paper":
+        _player.play('PAPIER.mp3');
+        break;
+      case "Glass":
+        _player.play('SZKLO.mp3');
+        break;
+      case "Plastic & metal":
+        _player.play('METAL-PLASTIK.mp3');
+        break;
+      case "Organic":
+        _player.play('BIO.mp3');
+        break;
+      default:
+        _player.play('PSZOK.mp3');
+        break;
+    }
   }
 }

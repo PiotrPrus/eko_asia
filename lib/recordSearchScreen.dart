@@ -12,17 +12,17 @@ import 'ChosenCity.dart';
 import 'Product.dart';
 
 class RecordSearchScreen extends StatelessWidget {
-  static const routeName = '/recordSearch';
+  final ChosenCity city;
+  RecordSearchScreen({Key key, @required this.city}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final ChosenCity args = ModalRoute.of(context).settings.arguments;
 
     return Scaffold(
       appBar: AppBar(
         title: Text("Record and Search"),
       ),
-      body: Center(child: PlayerWidget(city: args)),
+      body: Center(child: PlayerWidget(city: city)),
     );
   }
 }

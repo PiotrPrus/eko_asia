@@ -1,12 +1,16 @@
+import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
-import 'ChosenCity.dart';
 
-class RecordSearchScreen extends StatelessWidget {
-  static const routeName = '/recordSearch';
+import 'ChosenCity.dart';
+import 'recordSearchScreen.dart';
+
+class AskAboutProduct extends StatelessWidget {
+  static const routeName = '/askAsia';
 
   @override
   Widget build(BuildContext context) {
@@ -18,19 +22,10 @@ class RecordSearchScreen extends StatelessWidget {
         title: Text("Record and Search"),
       ),
       body: Center(
-        child: PlayerWidget(city: args)
+          child: PlayerWidget(city: args)
       ),
     );
   }
-}
-
-class PlayerWidget extends StatefulWidget {
-  PlayerWidget({Key key, this.city}) : super(key: key);
-
-  final ChosenCity city;
-
-  @override
-  _PlayerWidgetState createState() => _PlayerWidgetState();
 }
 
 class _PlayerWidgetState extends State<PlayerWidget> {

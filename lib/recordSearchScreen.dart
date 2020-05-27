@@ -56,7 +56,6 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   @override
   void initState() {
     super.initState();
-    _searchTextController.addListener(_printLatestValue);
   }
 
   @override
@@ -119,7 +118,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                 _searchTextController.text = "";
                 var response = await networkService
                     .fetchBinResponse(widget.city.cityCode, itemName.toLowerCase());
-                print(response.bins.map((e) => e.namePl));
+                response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
                 setState(() {
                   _bins.clear();
                   _bins.addAll(response.bins);
@@ -167,7 +166,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       _searchTextController.text = lastWords.toLowerCase();
 
       var response = await networkService.fetchBinResponse(widget.city.cityCode, lastWords);
-      print(response.bins.map((e) => "${e.namePl} ${e.products}"));
+      response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
       setState(() {
         _bins.clear();
         _bins.addAll(response.bins);
@@ -187,17 +186,13 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     });
   }
 
-  _printLatestValue() {
-    print("Searched text: ${_searchTextController.text}");
-  }
-
   Widget _buildBinsInstruction() {
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemCount: _bins.length,
         itemBuilder: /*1*/ (context, i) {
           if (_bins[i].products == null) {
-            return null;
+            return Container();
           }
           return _binRow(_bins[i]);
         });

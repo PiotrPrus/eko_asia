@@ -167,7 +167,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       _searchTextController.text = lastWords.toLowerCase();
 
       var response = await networkService.fetchBinResponse(lastWords);
-      print(response.bins.map((e) => e.namePl));
+      print(response.bins.map((e) => "${e.namePl} ${e.products}"));
       setState(() {
         _bins.clear();
         _bins.addAll(response.bins);
@@ -196,6 +196,9 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         padding: const EdgeInsets.all(16.0),
         itemCount: _bins.length,
         itemBuilder: /*1*/ (context, i) {
+          if (_bins[i].products == null) {
+            return null;
+          }
           return _binRow(_bins[i]);
         });
   }

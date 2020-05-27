@@ -16,7 +16,6 @@ import 'NetworkService.dart';
 
 class RecordSearchScreen extends StatelessWidget {
   final ChosenCity city;
-
   RecordSearchScreen({Key key, @required this.city}) : super(key: key);
 
   @override
@@ -180,17 +179,27 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       String lastWords = "${result.recognizedWords}";
       print(lastWords.toLowerCase());
       _searchTextController.text = lastWords.toLowerCase();
-      getDedicatedBins(lastWords);
+      getServerResponse(lastWords);
     });
   }
 
-  Future<void> getDedicatedBins(String itemName) async {
+  Future<void> getServerResponse(String itemName) async {
     var response =
         await networkService.fetchBinResponse(widget.city.cityCode, itemName);
+
+    if (response.questions != null) {
+      var question = response.questions.first;
+      _showMyDialog(question, itemName);
+    } else {
+      updateListWithBins(response);
+    }
+  }
+
+  void updateListWithBins(DedicatedBin response) {
     response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
 
     var responseList =
-        response.bins.where((element) => element.products != null).toList();
+    response.bins.where((element) => element.products != null).toList();
 
     //TODO: Fix for multiple answers
     if (responseList.length == 1) {
@@ -200,6 +209,27 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     setState(() {
       _bins.clear();
       _bins.addAll(responseList);
+    });
+  }
+
+  Future<void> _showMyDialog(Question question, String itemName) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(question.title),
+          actions: question.answers.map((answer) => answerButton(answer, question.id, itemName)).toList(),
+        );
+      },
+    );
+  }
+
+  FlatButton answerButton(Answers answer, String questionId, String itemName) {
+    return FlatButton(child: Text(answer.title), onPressed: () async {
+      Navigator.of(context).pop();
+      var response = await networkService.sendAnswer(questionId, answer.id, itemName);
+      updateListWithBins(response);
     });
   }
 
@@ -231,7 +261,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       children: <Widget>[
         Column(
           children: bin.products
-              .map((e) => new Text(e, style: TextStyle(fontSize: 20)))
+              .map((e) => Text(e, style: TextStyle(fontSize: 20)))
               .toList(),
         ),
         Image(

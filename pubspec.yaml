@@ -26,20 +26,17 @@ dependencies:
   audioplayers: ^0.15.1
   speech_to_text: ^2.2.0
 
+  firebase_core: ^0.4.0+9
+  firebase_database: ^3.1.6
+  cloud_firestore: ^0.13.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
 
   assets:

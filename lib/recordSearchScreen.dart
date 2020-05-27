@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 
 import 'package:audioplayers/audio_cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +11,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'ChosenCity.dart';
+import 'NetworkService.dart';
 import 'Product.dart';
 
 class RecordSearchScreen extends StatelessWidget {
@@ -46,6 +49,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   final _searchTextController = TextEditingController();
 
   final _bins = <Product>[];
+
+  final networkService = NetworkService();
 
   final databaseReference = Firestore.instance;
 
@@ -115,7 +120,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             FlatButton(
               onPressed: () {
                 print("STOP!");
-                speech.stop();
+                networkService.fetchBinResponse();
+//                speech.stop();
               },
               child: Text('Search', style: TextStyle(fontSize: 20)),
             ),

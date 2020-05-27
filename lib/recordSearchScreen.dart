@@ -120,7 +120,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             FlatButton(
               onPressed: () {
                 print("STOP!");
-                networkService.fetchBinResponse();
+                print(networkService.fetchBinResponse());
 //                speech.stop();
               },
               child: Text('Search', style: TextStyle(fontSize: 20)),

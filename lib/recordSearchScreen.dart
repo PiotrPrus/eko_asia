@@ -120,7 +120,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                   onPressed: () async {
                     var itemName = _searchTextController.text;
                     _searchTextController.text = "";
-                    getDedicatedBins(itemName);
+                    getServerResponse(itemName);
                   },
                 ),
               ),
@@ -151,14 +151,11 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     setState(() {
       if (_hasSpeech) {
         if(speech.isListening) {
-          print("AAA, isListening");
           _micImage = AssetImage('assets/images/mic_listening.png');
         } else {
-          print("AAA, isReady");
           _micImage = AssetImage('assets/images/mic_active.png');
         }
       } else {
-        print("AAA, isInactive");
         _micImage = AssetImage('assets/images/mic_inactive.png');
       }
     });

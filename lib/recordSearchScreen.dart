@@ -45,6 +45,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   final _searchTextController = TextEditingController();
   AssetImage _micImage;
 
+  bool noProductFound = false;
+
   final _bins = <Bin>[];
 
   final networkService = NetworkService();
@@ -126,7 +128,12 @@ class _PlayerWidgetState extends State<PlayerWidget> {
               ),
             ],
           ),
-          Expanded(child: _buildBinsInstruction())
+          Expanded(
+              child: noProductFound ? Text("Niestety nie wiemy gdzie to wyrzucic :(",
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,) :
+                _buildBinsInstruction()
+          )
         ],
       ),
     );
@@ -150,7 +157,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   void updateMicImage() {
     setState(() {
       if (_hasSpeech) {
-        if(speech.isListening) {
+        if (speech.isListening) {
           _micImage = AssetImage('assets/images/mic_listening.png');
         } else {
           _micImage = AssetImage('assets/images/mic_active.png');
@@ -181,26 +188,39 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   }
 
   Future<void> getServerResponse(String itemName) async {
-    var trimmedText = itemName.replaceAll("hej", '')
+    setState(() {
+      noProductFound = false;
+    });
+
+    var trimmedText = itemName
+        .toLowerCase()
+        .replaceAll("hej", '')
         .replaceAll("ekoasia", '')
         .replaceAll("gdzie", '')
         .replaceAll("wyrzucę", '')
         .replaceAll("wyrzuce", '')
         .replaceAll("wyrzucic", '')
+        .replaceAll("wyrzucić", '')
         .replaceAll("co", '')
         .replaceAll("zrobić", '')
-        .toLowerCase().trim();
+        .trim();
 
     print(trimmedText);
 
-    var response =
-        await networkService.fetchBinResponse(widget.city.cityCode, trimmedText);
-
-    if (response.questions != null) {
-      var question = response.questions.first;
-      _showMyDialog(question, trimmedText);
-    } else {
-      updateListWithBins(response);
+    try {
+      var response = await networkService.fetchBinResponse(
+          widget.city.cityCode, trimmedText);
+      if (response.questions != null) {
+        var question = response.questions.first;
+        _showMyDialog(question, trimmedText);
+      } else {
+        updateListWithBins(response);
+      }
+    } catch (e) {
+      _bins.clear();
+      setState(() {
+        noProductFound = true;
+      });
     }
   }
 
@@ -208,7 +228,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     response.bins.forEach((e) => debugPrint("${e.namePl} ${e.products}"));
 
     var responseList =
-    response.bins.where((element) => element.products != null).toList();
+        response.bins.where((element) => element.products != null).toList();
 
     //TODO: Fix for multiple answers
     if (responseList.length == 1) {
@@ -228,18 +248,23 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(question.title),
-          actions: question.answers.map((answer) => answerButton(answer, question.id, itemName)).toList(),
+          actions: question.answers
+              .map((answer) => answerButton(answer, question.id, itemName))
+              .toList(),
         );
       },
     );
   }
 
   FlatButton answerButton(Answers answer, String questionId, String itemName) {
-    return FlatButton(child: Text(answer.title), onPressed: () async {
-      Navigator.of(context).pop();
-      var response = await networkService.sendAnswer(questionId, answer.id, itemName);
-      updateListWithBins(response);
-    });
+    return FlatButton(
+        child: Text(answer.title),
+        onPressed: () async {
+          Navigator.of(context).pop();
+          var response =
+              await networkService.sendAnswer(questionId, answer.id, itemName);
+          updateListWithBins(response);
+        });
   }
 
   void statusListener(String status) {

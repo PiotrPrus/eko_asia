@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:audioplayers/audio_cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:loading/indicator/ball_pulse_indicator.dart';
+import 'package:loading/loading.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -46,6 +48,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   AssetImage _micImage;
 
   bool noProductFound = false;
+  bool isLoading = false;
 
   final _bins = <Bin>[];
 
@@ -129,18 +132,29 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             ],
           ),
           Expanded(
-              child: noProductFound
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "Niestety nie wiemy gdzie to wyrzucic :(",
-                        style: TextStyle(fontSize: 24),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  : _buildBinsInstruction())
+              child: isLoading ? loadingIndicator() : responseWidget()
+          )
         ],
       ),
+    );
+  }
+
+  Widget responseWidget() {
+    return noProductFound
+        ? Padding(padding: const EdgeInsets.all(8.0),  child: Text(
+        "Niestety nie wiemy gdzie to wyrzucic :(",
+        style: TextStyle(fontSize: 24),
+        textAlign: TextAlign.center,
+      ),
+    )
+        : _buildBinsInstruction();
+  }
+
+  Widget loadingIndicator() {
+    return Container(
+      child: Center(
+        child: Loading(indicator: BallPulseIndicator(), size: 100.0,color: Colors.pink)
+      )
     );
   }
 
@@ -195,6 +209,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   Future<void> getServerResponse(String itemName) async {
     setState(() {
       noProductFound = false;
+      isLoading = true;
     });
 
     var trimmedText = itemName
@@ -215,6 +230,11 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     try {
       var response = await networkService.fetchBinResponse(
           widget.city.cityCode, trimmedText);
+
+      setState(() {
+        isLoading = false;
+      });
+
       if (response.questions != null) {
         var question = response.questions.first;
         _showMyDialog(question, trimmedText);
@@ -225,6 +245,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       _bins.clear();
       setState(() {
         noProductFound = true;
+        isLoading = false;
       });
     }
   }
@@ -266,8 +287,18 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         child: Text(answer.title),
         onPressed: () async {
           Navigator.of(context).pop();
+
+          setState(() {
+            isLoading = true;
+          });
+
           var response =
               await networkService.sendAnswer(questionId, answer.id, itemName);
+
+          setState(() {
+            isLoading = false;
+          });
+
           updateListWithBins(response);
         });
   }

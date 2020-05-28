@@ -274,7 +274,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     switch (bin.name) {
       case "Other":
         // TODO: grafika
-        return "assets/images/odpady-niebezpieczne.png";
+        return "assets/images/odpady-zmieszane.png";
       case "Paper":
         return "assets/images/kontener-na-papier.png";
       case "Glass":

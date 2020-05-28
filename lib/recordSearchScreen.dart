@@ -181,12 +181,24 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   }
 
   Future<void> getServerResponse(String itemName) async {
+    var trimmedText = itemName.replaceAll("hej", '')
+        .replaceAll("ekoasia", '')
+        .replaceAll("gdzie", '')
+        .replaceAll("wyrzucę", '')
+        .replaceAll("wyrzuce", '')
+        .replaceAll("wyrzucic", '')
+        .replaceAll("co", '')
+        .replaceAll("zrobić", '')
+        .toLowerCase().trim();
+
+    print(trimmedText);
+
     var response =
-        await networkService.fetchBinResponse(widget.city.cityCode, itemName);
+        await networkService.fetchBinResponse(widget.city.cityCode, trimmedText);
 
     if (response.questions != null) {
       var question = response.questions.first;
-      _showMyDialog(question, itemName);
+      _showMyDialog(question, trimmedText);
     } else {
       updateListWithBins(response);
     }
@@ -273,7 +285,6 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   String _imagePath(Bin bin) {
     switch (bin.name) {
       case "Other":
-        // TODO: grafika
         return "assets/images/odpady-niebezpieczne.png";
       case "Paper":
         return "assets/images/kontener-na-papier.png";

@@ -214,15 +214,19 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
     var trimmedText = itemName
         .toLowerCase()
-        .replaceAll("hej", '')
-        .replaceAll("ekoasia", '')
-        .replaceAll("gdzie", '')
-        .replaceAll("wyrzucę", '')
-        .replaceAll("wyrzuce", '')
-        .replaceAll("wyrzucic", '')
-        .replaceAll("wyrzucić", '')
-        .replaceAll("co", '')
-        .replaceAll("zrobić", '')
+        .replaceAll("hej ", '')
+        .replaceAll("hejka ", '')
+        .replaceAll("asia ", '')
+        .replaceAll("echo ", '')
+        .replaceAll("ekoasia ", '')
+        .replaceAll("gdzie ", '')
+        .replaceAll("wrzucę ", '')
+        .replaceAll("wyrzucę ", '')
+        .replaceAll("wyrzuce ", '')
+        .replaceAll("wyrzucic ", '')
+        .replaceAll("wyrzucić ", '')
+        .replaceAll("co ", '')
+        .replaceAll("zrobić ", '')
         .trim();
 
     print(trimmedText);

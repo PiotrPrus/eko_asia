@@ -129,11 +129,16 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             ],
           ),
           Expanded(
-              child: noProductFound ? Text("Niestety nie wiemy gdzie to wyrzucic :(",
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,) :
-                _buildBinsInstruction()
-          )
+              child: noProductFound
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "Niestety nie wiemy gdzie to wyrzucic :(",
+                        style: TextStyle(fontSize: 24),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : _buildBinsInstruction())
         ],
       ),
     );
